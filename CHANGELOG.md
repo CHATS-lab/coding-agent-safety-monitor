@@ -6,5 +6,5 @@
 
 - Initial public release.
 - PreToolUse safety monitor for Claude Code with LLM-based trajectory analysis.
-- Tkinter alert dialog (cross-platform, stdlib only).
+- Native desktop alert (osascript / zenity / PowerShell), no extra deps.
 - Local audit logs: `monitor_<s8>.log` and `monitor_usage_<session>.jsonl`.

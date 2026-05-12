@@ -8,7 +8,7 @@ The plugin hooks `PreToolUse`. On every tool call the agent is about to make, th
 
 If the score is at or below 80, the hook returns silently and the agent's tool call goes through as if the monitor weren't there. The agent never finds out it was watched.
 
-If the score is above 80, the hook prints a `permissionDecision: "ask"` back to Claude Code — which surfaces its built-in permission prompt — and at the same time launches a pop-up dialog explaining what the LLM thought was off. You read both, then approve or reject in the Claude Code panel.
+If the score is above 80, the hook prints a `permissionDecision: "ask"` back to Claude Code — which surfaces its built-in permission prompt — and at the same time launches a native desktop alert (osascript on macOS, zenity/kdialog/xmessage on Linux, PowerShell MessageBox on Windows) explaining what the LLM thought was off. You read both, then approve or reject in the Claude Code panel.
 
 ## Installation
 

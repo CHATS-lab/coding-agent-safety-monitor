@@ -12,8 +12,8 @@ def test_dialog_file_exists():
     assert DIALOG.exists()
 
 
-def test_dialog_imports_only_stdlib_and_tkinter():
-    """No imports of deleted variant modules."""
+def test_dialog_no_legacy_variant_imports():
+    """No references to deleted alert_dialog variants from the research seed."""
     src = DIALOG.read_text()
     for forbidden in (
         "alert_dialog_v1",
