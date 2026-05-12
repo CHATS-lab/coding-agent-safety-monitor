@@ -1,0 +1,10 @@
+{
+    "name": "safety-monitor",
+    "description": "Transparent LLM-based safety monitor for autonomous coding agents",
+    "version": "0.0.1",
+    "author": { "name": "Jingheng Ye" },
+    "homepage": "https://github.com/CHATS-lab/coding-agent-safety-monitor",
+    "repository": "https://github.com/CHATS-lab/coding-agent-safety-monitor",
+    "license": "MIT",
+    "keywords": ["safety", "monitor", "agent", "security", "claude-code"]
+}

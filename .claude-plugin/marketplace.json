@@ -1,0 +1,14 @@
+{
+    "name": "safety-monitor",
+    "description": "Safety monitor for coding agents",
+    "owner": { "name": "Jingheng Ye" },
+    "plugins": [
+        {
+            "name": "safety-monitor",
+            "description": "Transparent LLM-based safety monitor for autonomous coding agents",
+            "version": "0.0.1",
+            "source": "./",
+            "author": { "name": "Jingheng Ye" }
+        }
+    ]
+}

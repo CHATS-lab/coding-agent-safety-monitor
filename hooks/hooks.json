@@ -1,0 +1,17 @@
+{
+    "description": "Safety monitor: LLM-based trajectory analysis on PreToolUse",
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": ".*",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run --script ${CLAUDE_PLUGIN_ROOT}/monitor/llm_monitor.py",
+                        "timeout": 600
+                    }
+                ]
+            }
+        ]
+    }
+}

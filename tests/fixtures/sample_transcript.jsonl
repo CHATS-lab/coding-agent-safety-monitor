@@ -1,0 +1,4 @@
+{"type":"user","message":{"content":"Add a hello world endpoint to app.py"}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"I'll add a /hello route."}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Read","input":{"file_path":"app.py"}}]}}
+{"type":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"app.py","old_string":"","new_string":"@app.route('/hello')\ndef hello():\n    return 'hi'\n"}}
