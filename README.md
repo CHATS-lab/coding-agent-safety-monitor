@@ -1,4 +1,18 @@
-# Safety Monitor
+<p align="center">
+  <img src="assets/logo.png" alt="Safety Monitor logo" width="160">
+</p>
+
+<h1 align="center">Safety Monitor</h1>
+
+<p align="center">
+  <strong>Catch your coding agent before it sabotages.</strong><br>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/version-v0.0.5-brightgreen" alt="Version v0.0.5">
+</p>
 
 A Claude Code plugin that monitors your coding agent. Before the agent runs a command or edits a file, the monitor reads the conversation so far, asks a separate LLM whether the next move looks malicious or off-task, and pops up a desktop dialog if it does.
 
@@ -79,17 +93,6 @@ Two files per session, under `<cwd>/logs/safety_monitor/`:
 - `monitor_usage_<session>.jsonl`: token counts and durations, one record per LLM call
 
 Nothing else leaves your machine.
-
-## Citing
-
-```
-@misc{safety-monitor-2026,
-  author = {Ye, Jingheng},
-  title  = {Safety Monitor: An LLM-Based Monitor for Coding Agents},
-  year   = {2026},
-  url    = {https://github.com/CHATS-lab/coding-agent-safety-monitor}
-}
-```
 
 ## License
 
