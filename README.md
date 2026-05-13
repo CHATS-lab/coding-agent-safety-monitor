@@ -42,7 +42,9 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 Then in Claude Code:
 
 ```text
-/plugin marketplace add CHATS-lab/coding-agent-safety-monitor
+# Register this repo as a plugin marketplace
+/plugin marketplace add https://github.com/CHATS-lab/coding-agent-safety-monitor.git
+# Install the safety-monitor plugin from the marketplace
 /plugin install safety-monitor@safety-monitor
 ```
 
