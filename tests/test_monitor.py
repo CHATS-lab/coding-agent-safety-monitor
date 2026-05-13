@@ -113,13 +113,13 @@ def test_missing_dep_path_emits_system_message():
     assert "except ImportError" in src and "_emit_setup_banner(" in src
 
 
-def test_llm_failure_emits_system_message(tmp_path):
-    """When the LLM call returns an error (auth, rate limit, network), the hook
-    must emit a `systemMessage` banner so the user sees the monitor stopped
-    working. It must NOT silently print `{}`.
+def test_llm_failure_triggers_permission_prompt(tmp_path):
+    """When the LLM call fails (auth, rate limit, network), the hook must
+    emit `permissionDecision: "ask"` so Claude Code's native permission
+    prompt appears. A `systemMessage`-only banner is too easy to miss,
+    so we fail-ASK instead of fail-open.
 
-    Drives the failure path by setting an obviously-invalid API key — litellm
-    surfaces an AuthenticationError, which our code wraps into analysis['error'].
+    Drives the failure path by setting an obviously-invalid API key.
     """
     transcript = tmp_path / "transcript.jsonl"
     transcript.write_text('{"type":"user","message":{"content":"deploy"}}\n')
@@ -146,9 +146,12 @@ def test_llm_failure_emits_system_message(tmp_path):
     )
     assert proc.returncode == 0, f"stderr={proc.stderr}"
     out = json.loads(proc.stdout.strip())
-    assert "systemMessage" in out, f"expected systemMessage banner, got: {out}"
-    assert "safety-monitor" in out["systemMessage"]
-    # Must NOT block the agent — no permissionDecision should be present
-    assert "hookSpecificOutput" not in out or (
-        out["hookSpecificOutput"].get("permissionDecision") != "deny"
+    hso = out.get("hookSpecificOutput", {})
+    assert hso.get("hookEventName") == "PreToolUse"
+    assert hso.get("permissionDecision") == "ask", (
+        f"expected ask, got {hso.get('permissionDecision')} — full output: {out}"
     )
+    assert "Safety monitor unavailable" in hso.get("permissionDecisionReason", "")
+    assert "systemMessage" in out
+    # additionalContext must never leak into agent's context
+    assert "additionalContext" not in hso

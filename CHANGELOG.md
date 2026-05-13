@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3] - 2026-05-12
+
+### Changed
+
+- LLM-call failures now emit `permissionDecision: "ask"` instead of a `systemMessage`-only banner. In practice Claude Code didn't render the banner visibly enough on its own — users still felt the monitor was failing silently. By switching to `ask`, the native permission prompt appears and the agent cannot proceed until the user explicitly approves. Policy: **fail-ASK**, not fail-open.
+- On LLM failure, the desktop alert dialog also pops up so the user is doubly notified.
+
 ## [0.0.2] - 2026-05-12
 
 ### Changed

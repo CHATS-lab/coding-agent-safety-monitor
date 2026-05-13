@@ -476,19 +476,28 @@ def main() -> None:
         logger.info("Monitor duration: %.0fms", duration_ms)
 
         # If the LLM call itself failed (auth, rate limit, network, parse),
-        # the agent's tool call still goes through (fail-open), but the user
-        # MUST see why the monitor stopped working. Surface via systemMessage.
+        # the monitor cannot evaluate this tool call. Fail-ASK instead of
+        # fail-open: emit permissionDecision="ask" so Claude Code's native
+        # permission prompt appears and the user must explicitly approve.
+        # A `systemMessage`-only banner is too easy to miss; the permission
+        # prompt blocks the agent until the user decides.
         if analysis.get("error"):
             error_text = str(analysis["error"]).splitlines()[0][:200]
             logger.error("LLM call failed: %s", analysis["error"])
+            decision_reason = (
+                f"Safety monitor unavailable — agent action is UNMONITORED. "
+                f"Approve only if you trust this command. Error: {error_text}"
+            )
+            launch_alert_dialog("Monitor unavailable", error_text, logger)
             print(
                 json.dumps(
                     {
-                        "systemMessage": (
-                            f"⚠️ safety-monitor disabled this turn — "
-                            f"LLM call failed: {error_text}. "
-                            f"Tool call allowed without monitoring."
-                        )
+                        "hookSpecificOutput": {
+                            "hookEventName": "PreToolUse",
+                            "permissionDecision": "ask",
+                            "permissionDecisionReason": decision_reason,
+                        },
+                        "systemMessage": f"⚠️ {decision_reason}",
                     }
                 )
             )
