@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.4] - 2026-05-12
+
+### Added
+
+- `.env` file search now covers four standard locations in priority order: `<cwd>/.env`, `~/.claude/.env`, `~/.env`, and the plugin dir. Users can put their `ANTHROPIC_API_KEY` wherever feels natural — no need to know the plugin install path.
+- Error-specific diagnostics: when the LLM call fails with a missing or invalid API key, the dialog and permission prompt say `Set ANTHROPIC_API_KEY in ~/.claude/.env, ~/.env, or your shell` instead of dumping the raw litellm stack message. Rate-limit and network errors get their own short messages too.
+- Dialog body is now kept short (one line). The longer fix instruction lives in the Claude Code permission prompt where there's more room.
+
 ## [0.0.3] - 2026-05-12
 
 ### Changed

@@ -32,12 +32,24 @@ def get_int_env(name: str, default: int) -> int:
 
 
 def load_env_file() -> None:
-    """Load environment variables from `.env` next to the plugin or its parent.
+    """Load env vars from the first `.env` found in standard user locations.
 
-    Shell-provided env always wins; .env only fills in unset keys.
+    Priority (highest wins; shell env always wins overall):
+      1. <cwd>/.env             — per-project override
+      2. ~/.claude/.env         — Claude Code config dir (recommended)
+      3. ~/.env                 — user-global
+      4. ${CLAUDE_PLUGIN_ROOT}/.env — plugin-bundled fallback
+
+    All four are merged with `override=False` so the first one that
+    defines a key wins; later files only fill in missing keys.
     """
     plugin_root = get_plugin_root()
-    for candidate in [plugin_root / ".env", plugin_root.parent / ".env"]:
+    search_paths = [
+        Path.cwd() / ".env",
+        Path.home() / ".claude" / ".env",
+        Path.home() / ".env",
+        plugin_root / ".env",
+    ]
+    for candidate in search_paths:
         if candidate.exists():
             load_dotenv(dotenv_path=candidate, override=False)
-            break

@@ -40,7 +40,22 @@ There's no `pip install` step. uv builds an isolated virtualenv the first time t
 
 ## Configuration
 
-Set `ANTHROPIC_API_KEY` in `~/.env` or your shell. That's the only thing you have to set. The rest defaults to something sensible:
+Set `ANTHROPIC_API_KEY` somewhere the plugin can find it. The monitor looks at these locations in order, first match wins:
+
+1. shell env (`export ANTHROPIC_API_KEY=...`)
+2. `<cwd>/.env` — per-project override
+3. `~/.claude/.env` — recommended for most users
+4. `~/.env` — user-global
+
+Easiest one-liner:
+
+```bash
+echo 'ANTHROPIC_API_KEY=sk-ant-...' >> ~/.claude/.env
+```
+
+If the key is missing or invalid, the monitor doesn't silently fail — it pops a native alert and asks for your approval in Claude Code before the agent proceeds.
+
+The rest defaults to something sensible:
 
 ```
 MONITOR_ENABLED=true                # master switch
@@ -73,3 +88,8 @@ Nothing else leaves your machine.
 ## License
 
 MIT License - see LICENSE file for details.
+
+
+
+
+

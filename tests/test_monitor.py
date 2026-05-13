@@ -151,7 +151,9 @@ def test_llm_failure_triggers_permission_prompt(tmp_path):
     assert hso.get("permissionDecision") == "ask", (
         f"expected ask, got {hso.get('permissionDecision')} — full output: {out}"
     )
-    assert "Safety monitor unavailable" in hso.get("permissionDecisionReason", "")
+    reason = hso.get("permissionDecisionReason", "")
+    # Diagnose helper should produce the API-key-specific message
+    assert "API key" in reason or "ANTHROPIC_API_KEY" in reason, f"reason={reason}"
+    assert "~/.claude/.env" in reason or "~/.env" in reason
     assert "systemMessage" in out
-    # additionalContext must never leak into agent's context
     assert "additionalContext" not in hso

@@ -360,15 +360,56 @@ def append_usage_record(
         os.close(fd)
 
 
-DIALOG_ACTION_LINE = (
-    "Review this monitor warning carefully, "
-    "then approve or reject the pending action in Claude Code."
-)
+DEFAULT_DIALOG_ACTION = "Approve or reject in Claude Code."
 DIALOG_SEVERITY = "Critical"
 
 
-def launch_alert_dialog(title: str, message: str, logger: logging.Logger) -> None:
-    """Launch the tkinter alert dialog in a detached process. Returns immediately."""
+def _diagnose_llm_error(error: str) -> tuple[str, str, str]:
+    """Map an opaque litellm error into a short, user-actionable diagnostic.
+
+    Returns (dialog_title, dialog_body, fix_instruction). All three are kept
+    short — the dialog is small. The fix_instruction goes verbatim into the
+    Claude Code permission prompt where there's more room.
+    """
+    lowered = error.lower()
+    is_auth = (
+        "authentication" in lowered
+        or "api key" in lowered
+        or "api-key" in lowered
+        or "x-api-key" in lowered
+    )
+    if is_auth:
+        return (
+            "Monitor offline: API key",
+            "ANTHROPIC_API_KEY missing or invalid.",
+            "Set ANTHROPIC_API_KEY in ~/.claude/.env, ~/.env, or your shell.",
+        )
+    if "rate" in lowered and "limit" in lowered:
+        return (
+            "Monitor offline: rate limited",
+            "Anthropic rate limit hit.",
+            "Wait a moment and retry.",
+        )
+    if "timeout" in lowered or "connection" in lowered or "network" in lowered:
+        return (
+            "Monitor offline: network",
+            "Cannot reach Anthropic API.",
+            "Check your internet connection.",
+        )
+    short = error.splitlines()[0][:80]
+    return ("Monitor offline", short, "See log: logs/safety_monitor/")
+
+
+def launch_alert_dialog(
+    title: str,
+    message: str,
+    logger: logging.Logger,
+    action: str = DEFAULT_DIALOG_ACTION,
+) -> None:
+    """Launch the native OS alert dialog in a detached process. Returns immediately.
+
+    Keep `title`, `message`, `action` short — the dialog is a small modal.
+    """
     if os.name != "nt" and not _has_graphical_display():
         logger.warning("launch_alert_dialog: no graphical display available")
         return
@@ -388,9 +429,7 @@ def launch_alert_dialog(title: str, message: str, logger: logging.Logger) -> Non
     command = [python_path]
     if Path(python_path).name.lower() == "py":
         command.append("-3")
-    command.extend(
-        [str(dialog_script), DIALOG_SEVERITY, title, message, DIALOG_ACTION_LINE]
-    )
+    command.extend([str(dialog_script), DIALOG_SEVERITY, title, message, action])
 
     popen_kwargs: dict[str, object] = {
         "start_new_session": True,
@@ -475,20 +514,14 @@ def main() -> None:
             logger.info("LLM call usage: %s", json.dumps(usage))
         logger.info("Monitor duration: %.0fms", duration_ms)
 
-        # If the LLM call itself failed (auth, rate limit, network, parse),
-        # the monitor cannot evaluate this tool call. Fail-ASK instead of
-        # fail-open: emit permissionDecision="ask" so Claude Code's native
-        # permission prompt appears and the user must explicitly approve.
-        # A `systemMessage`-only banner is too easy to miss; the permission
-        # prompt blocks the agent until the user decides.
+        # Fail-ASK on LLM errors: emit permissionDecision="ask" so Claude Code's
+        # native permission prompt appears. The diagnose helper picks a short
+        # title + body + fix instruction tailored to the error class.
         if analysis.get("error"):
-            error_text = str(analysis["error"]).splitlines()[0][:200]
             logger.error("LLM call failed: %s", analysis["error"])
-            decision_reason = (
-                f"Safety monitor unavailable — agent action is UNMONITORED. "
-                f"Approve only if you trust this command. Error: {error_text}"
-            )
-            launch_alert_dialog("Monitor unavailable", error_text, logger)
+            dialog_title, dialog_body, fix = _diagnose_llm_error(str(analysis["error"]))
+            launch_alert_dialog(dialog_title, dialog_body, logger, action=fix)
+            decision_reason = f"{dialog_title}: {dialog_body} {fix}"
             print(
                 json.dumps(
                     {
