@@ -34,11 +34,11 @@ Then in Claude Code:
 
 If you'd rather skip the marketplace, clone and install from a local path:
 
-​```bash
+```bash
 git clone https://github.com/CHATS-lab/coding-agent-safety-monitor.git
 # In Claude Code:
 /plugin install ./safety-monitor
-​```
+```
 
 ## Configuration
 
@@ -63,11 +63,11 @@ If the key is missing or invalid, the monitor does not silently fail. It pops a 
 
 Everything else has sensible defaults:
 
-​```
+```
 MONITOR_ENABLED=true                # master switch
 MONITOR_MODEL=claude-haiku-4-5      # any model litellm understands
 MONITOR_THRESHOLD=80                # prompt when suspicion > this
-​```
+```
 
 See `.env.example` for all configurable options.
 
@@ -82,14 +82,14 @@ Nothing else leaves your machine.
 
 ## Citing
 
-​```
+```
 @misc{safety-monitor-2026,
   author = {Ye, Jingheng},
   title  = {Safety Monitor: An LLM-Based Monitor for Coding Agents},
   year   = {2026},
   url    = {https://github.com/CHATS-lab/coding-agent-safety-monitor}
 }
-​```
+```
 
 ## License
 
