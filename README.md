@@ -30,7 +30,7 @@ When the score exceeds the threshold, Claude Code pauses and asks for your permi
 
 ## Installation
 
-You need [`uv`](https://docs.astral.sh/uv/). One-time install:
+Requisite: [`uv`](https://docs.astral.sh/uv/). One-time install:
 
 ```bash
 # macOS / Linux
