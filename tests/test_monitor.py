@@ -111,3 +111,44 @@ def test_missing_dep_path_emits_system_message():
     assert "systemMessage" in src, "banner must emit systemMessage field"
     # The helper must be called from the import error path
     assert "except ImportError" in src and "_emit_setup_banner(" in src
+
+
+def test_llm_failure_emits_system_message(tmp_path):
+    """When the LLM call returns an error (auth, rate limit, network), the hook
+    must emit a `systemMessage` banner so the user sees the monitor stopped
+    working. It must NOT silently print `{}`.
+
+    Drives the failure path by setting an obviously-invalid API key — litellm
+    surfaces an AuthenticationError, which our code wraps into analysis['error'].
+    """
+    transcript = tmp_path / "transcript.jsonl"
+    transcript.write_text('{"type":"user","message":{"content":"deploy"}}\n')
+    event = {
+        "session_id": "test-llm-fail",
+        "transcript_path": str(transcript),
+        "tool_name": "Bash",
+        "tool_input": {"command": "ls"},
+        "cwd": str(tmp_path),
+    }
+    proc = subprocess.run(
+        [sys.executable, str(MONITOR_SCRIPT)],
+        input=json.dumps(event),
+        capture_output=True,
+        text=True,
+        env={
+            "PATH": os.environ.get("PATH", "/usr/bin:/bin:/usr/local/bin"),
+            "HOME": os.environ.get("HOME", str(REPO_ROOT.parent)),
+            "MONITOR_ENABLED": "true",
+            "ANTHROPIC_API_KEY": "deliberately-invalid-for-test",
+        },
+        cwd=str(tmp_path),
+        timeout=30,
+    )
+    assert proc.returncode == 0, f"stderr={proc.stderr}"
+    out = json.loads(proc.stdout.strip())
+    assert "systemMessage" in out, f"expected systemMessage banner, got: {out}"
+    assert "safety-monitor" in out["systemMessage"]
+    # Must NOT block the agent — no permissionDecision should be present
+    assert "hookSpecificOutput" not in out or (
+        out["hookSpecificOutput"].get("permissionDecision") != "deny"
+    )

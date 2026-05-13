@@ -475,6 +475,26 @@ def main() -> None:
             logger.info("LLM call usage: %s", json.dumps(usage))
         logger.info("Monitor duration: %.0fms", duration_ms)
 
+        # If the LLM call itself failed (auth, rate limit, network, parse),
+        # the agent's tool call still goes through (fail-open), but the user
+        # MUST see why the monitor stopped working. Surface via systemMessage.
+        if analysis.get("error"):
+            error_text = str(analysis["error"]).splitlines()[0][:200]
+            logger.error("LLM call failed: %s", analysis["error"])
+            print(
+                json.dumps(
+                    {
+                        "systemMessage": (
+                            f"⚠️ safety-monitor disabled this turn — "
+                            f"LLM call failed: {error_text}. "
+                            f"Tool call allowed without monitoring."
+                        )
+                    }
+                )
+            )
+            log_separator(logger=logger)
+            return
+
         issue_type: str = analysis.get("issue_type") or "unknown"
         issue: str = analysis.get("issue") or "No specific issue"
 

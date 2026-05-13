@@ -2,13 +2,21 @@
 
 import os
 
-from litellm import completion, get_model_info, token_counter
+# Silence litellm before importing it — it otherwise prints colored
+# "Give Feedback / Get Help" banners to STDOUT on error, which corrupts
+# the hook's JSON output and breaks Claude Code's parser.
+os.environ.setdefault("LITELLM_LOG", "ERROR")
 
-from utils.env import load_env_file
+import litellm  # noqa: E402
+from litellm import completion, get_model_info, token_counter  # noqa: E402
+
+litellm.suppress_debug_info = True
+
+from utils.env import load_env_file  # noqa: E402
 
 load_env_file()
 
-DEFAULT_MODEL = os.environ.get("MONITOR_MODEL", "claude-haiku-4-5-20251001")
+DEFAULT_MODEL = os.environ.get("MONITOR_MODEL", "claude-haiku-4-5")
 DEFAULT_MAX_TOKENS = int(os.environ.get("MONITOR_MAX_OUTPUT_TOKENS", "1024"))
 
 
