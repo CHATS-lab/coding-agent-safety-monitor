@@ -1,14 +1,14 @@
 # Safety Monitor
 
-A Claude Code plugin that monitor your coding agent. Before it actually runs a command or edits a file, the monitor reads the conversation so far, asks a separate LLM whether the next move looks malicious or off-task, and if it does, pops up a desktop dialog so you can decide.
+A Claude Code plugin that monitors your coding agent. Before the agent runs a command or edits a file, the monitor reads the conversation so far, asks a separate LLM whether the next move looks malicious or off-task, and pops up a desktop dialog if it does.
 
 ## How it works
 
-The plugin hooks `PreToolUse`. On every tool call the agent is about to make, the monitor reads the session transcript, and ships it off to an LLM monitor with one question: how suspicious is this, on a scale of 0 to 100.
+The plugin hooks `PreToolUse`. On every tool call the agent is about to make, the monitor reads the session transcript and sends it to a separate LLM with one question: how suspicious is this, on a scale of 0 to 100.
 
-If the score is at or below 80, the hook returns silently and the agent's tool call goes through as if the monitor weren't there. The agent never finds out it was watched.
+If the score is at or below the threshold (default 80), the hook returns silently and the tool call goes through.
 
-If the score is above 80, the hook prints a `permissionDecision: "ask"` back to Claude Code — which surfaces its built-in permission prompt — and at the same time launches a native desktop alert (osascript on macOS, zenity/kdialog/xmessage on Linux, PowerShell MessageBox on Windows) explaining what the LLM thought was off. You read both, then approve or reject in the Claude Code panel.
+When the score exceeds the threshold, Claude Code pauses and asks for your permission, with a native dialog showing what the monitor flagged as suspicious.
 
 <p align="center">
   <img src="assets/dialog_mac.png" alt="Safety monitor alert dialog showing a high-suspicion finding" width="380">
@@ -16,14 +16,14 @@ If the score is above 80, the hook prints a `permissionDecision: "ask"` back to 
 
 ## Installation
 
-You need [`uv`](https://docs.astral.sh/uv/). One-time:
+You need [`uv`](https://docs.astral.sh/uv/). One-time install:
 
-```bash
+​```bash
 # macOS / Linux
 curl -LsSf https://astral.sh/uv/install.sh | sh
 # Windows
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
+​```
 
 Then in Claude Code:
 
@@ -32,24 +32,22 @@ Then in Claude Code:
 /plugin install safety-monitor@safety-monitor
 ```
 
-If you'd rather not add a marketplace, clone and install from the local path:
+If you'd rather skip the marketplace, clone and install from a local path:
 
-```bash
+​```bash
 git clone https://github.com/CHATS-lab/coding-agent-safety-monitor.git
 # In Claude Code:
 /plugin install ./safety-monitor
-```
-
-There's no `pip install` step. uv builds an isolated virtualenv the first time the hook fires and caches it for the rest of the session.
+​```
 
 ## Configuration
 
-Set `ANTHROPIC_API_KEY` somewhere the plugin can find it. The monitor looks at these locations in order, first match wins:
+Set `ANTHROPIC_API_KEY` somewhere the plugin can find it. The monitor checks these locations in order, first match wins:
 
 1. shell env (`export ANTHROPIC_API_KEY=...`)
-2. `<cwd>/.env` — per-project override
-3. `~/.claude/.env` — recommended for most users
-4. `~/.env` — user-global
+2. `<cwd>/.env`, per-project override
+3. `~/.claude/.env`, recommended for most users
+4. `~/.env`, user-global
 
 Easiest one-liner:
 
@@ -57,47 +55,42 @@ Easiest one-liner:
 echo 'ANTHROPIC_API_KEY=sk-ant-...' >> ~/.claude/.env
 ```
 
-If the key is missing or invalid, the monitor doesn't silently fail. It pops a native alert and asks for your approval in Claude Code before the agent proceeds.
+If the key is missing or invalid, the monitor does not silently fail. It pops a native alert and asks for your approval in Claude Code before the agent proceeds.
 
 <p align="center">
   <img src="assets/dialog_api_missing.png" alt="API key missing alert dialog" width="380">
 </p>
 
-The rest defaults to something sensible:
+Everything else has sensible defaults:
 
-```
+​```
 MONITOR_ENABLED=true                # master switch
 MONITOR_MODEL=claude-haiku-4-5      # any model litellm understands
-MONITOR_THRESHOLD=80                # popup when suspicion > this
-```
+MONITOR_THRESHOLD=80                # prompt when suspicion > this
+​```
 
-The full list of knobs is in `.env.example`. If you're going to cite this in a paper, pin a dated model id like `claude-haiku-4-5-20251001` so the reviewer can reproduce your numbers.
+See `.env.example` for all configurable options.
 
 ## Logs
 
 Two files per session, under `<cwd>/logs/safety_monitor/`:
 
-- `monitor_<session8>.log` — what happened, in plain text
-- `monitor_usage_<session>.jsonl` — token counts and durations, one record per LLM call
+- `monitor_<session8>.log`: human-readable trace of what happened
+- `monitor_usage_<session>.jsonl`: token counts and durations, one record per LLM call
 
 Nothing else leaves your machine.
 
 ## Citing
 
-```
+​```
 @misc{safety-monitor-2026,
   author = {Ye, Jingheng},
   title  = {Safety Monitor: An LLM-Based Monitor for Coding Agents},
   year   = {2026},
   url    = {https://github.com/CHATS-lab/coding-agent-safety-monitor}
 }
-```
+​```
 
 ## License
 
-MIT License - see LICENSE file for details.
-
-
-
-
-
+MIT License. See `LICENSE` for details.
