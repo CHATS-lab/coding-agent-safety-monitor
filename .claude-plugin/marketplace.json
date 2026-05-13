@@ -6,7 +6,7 @@
         {
             "name": "safety-monitor",
             "description": "Transparent LLM-based safety monitor for autonomous coding agents",
-            "version": "0.0.1",
+            "version": "0.0.2",
             "source": "./",
             "author": { "name": "Jingheng Ye" }
         }
