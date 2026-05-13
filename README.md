@@ -54,7 +54,8 @@ If you'd rather skip the marketplace, clone and install from a local path:
 ```bash
 # Clone the repo
 git clone https://github.com/CHATS-lab/coding-agent-safety-monitor.git
-# In Claude Code:
+
+# Install the plugin in Claude Code:
 /plugin install ./safety-monitor
 ```
 
