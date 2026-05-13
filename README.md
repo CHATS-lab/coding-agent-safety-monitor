@@ -18,12 +18,12 @@ When the score exceeds the threshold, Claude Code pauses and asks for your permi
 
 You need [`uv`](https://docs.astral.sh/uv/). One-time install:
 
-​```bash
+```bash
 # macOS / Linux
 curl -LsSf https://astral.sh/uv/install.sh | sh
 # Windows
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-​```
+```
 
 Then in Claude Code:
 
