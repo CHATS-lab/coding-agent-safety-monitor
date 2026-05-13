@@ -4,9 +4,9 @@
 
 ### Changed
 
-- Dialog title is cleaner: dropped the 🚨 emoji and the redundant "Critical: " prefix. macOS already renders the red critical icon via `osascript display alert as critical`.
-- Diagnostic titles shortened to fit one line: `Monitor offline: API key` → `API key needed`, `Monitor offline: rate limited` → `Rate limited`, `Monitor offline: network` → `Network error`.
-- LLM-returned `issue_type` is humanized before display: snake_case / kebab-case → Title Case, length capped at 32 chars. Suspicion dialogs now look uniform regardless of how the LLM phrased the issue type.
+- Dialog title is cleaner: dropped the 🚨 emoji and the redundant "Critical: " prefix.
+- Diagnostic titles shortened to fit one line.
+- LLM-returned `issue_type` is humanized before display: snake_case / kebab-case → Title Case, length capped at 32 chars.
 
 ### Added
 
@@ -16,27 +16,26 @@
 
 ### Added
 
-- `.env` file search now covers four standard locations in priority order: `<cwd>/.env`, `~/.claude/.env`, `~/.env`, and the plugin dir. Users can put their `ANTHROPIC_API_KEY` wherever feels natural — no need to know the plugin install path.
-- Error-specific diagnostics: when the LLM call fails with a missing or invalid API key, the dialog and permission prompt say `Set ANTHROPIC_API_KEY in ~/.claude/.env, ~/.env, or your shell` instead of dumping the raw litellm stack message. Rate-limit and network errors get their own short messages too.
+- `.env` file search now covers four standard locations in priority order: `<cwd>/.env`, `~/.claude/.env`, `~/.env`, and the plugin dir.
 - Dialog body is now kept short (one line). The longer fix instruction lives in the Claude Code permission prompt where there's more room.
 
 ## [0.0.3] - 2026-05-12
 
 ### Changed
 
-- LLM-call failures now emit `permissionDecision: "ask"` instead of a `systemMessage`-only banner. In practice Claude Code didn't render the banner visibly enough on its own — users still felt the monitor was failing silently. By switching to `ask`, the native permission prompt appears and the agent cannot proceed until the user explicitly approves. Policy: **fail-ASK**, not fail-open.
+- LLM-call failures now emit `permissionDecision: "ask"` instead of a `systemMessage`-only banner.
 - On LLM failure, the desktop alert dialog also pops up so the user is doubly notified.
 
 ## [0.0.2] - 2026-05-12
 
 ### Changed
 
-- Alert dialog switched from tkinter to OS-native backends (osascript on macOS, zenity / kdialog / xmessage on Linux, PowerShell MessageBox on Windows). Tkinter dialogs launched from a detached subprocess didn't reliably surface on the active macOS Space.
+- Alert dialog switched from tkinter to OS-native backends (osascript on macOS, zenity / kdialog / xmessage on Linux, PowerShell MessageBox on Windows).
 
 ### Fixed
 
-- LLM-call failures (missing API key, rate limit, network error, parse failure) now surface as a yellow `systemMessage` banner in Claude Code instead of silently allowing the tool call. The agent still proceeds (fail-open), but the user sees why the monitor stopped working.
-- Silenced litellm's colored "Give Feedback / Get Help" banners on stdout. Previously they corrupted the hook's JSON output and broke Claude Code's parser whenever any LLM error occurred.
+- LLM-call failures (missing API key, rate limit, network error, parse failure) now surface as a yellow `systemMessage` banner.
+- Silenced litellm's colored "Give Feedback / Get Help" banners on stdout.
 
 ## [0.0.1] - 2026-05-12
 
