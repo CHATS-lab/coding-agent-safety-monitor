@@ -10,6 +10,10 @@ If the score is at or below 80, the hook returns silently and the agent's tool c
 
 If the score is above 80, the hook prints a `permissionDecision: "ask"` back to Claude Code — which surfaces its built-in permission prompt — and at the same time launches a native desktop alert (osascript on macOS, zenity/kdialog/xmessage on Linux, PowerShell MessageBox on Windows) explaining what the LLM thought was off. You read both, then approve or reject in the Claude Code panel.
 
+<p align="center">
+  <img src="assets/dialog_mac.png" alt="Safety monitor alert dialog showing a high-suspicion finding" width="380">
+</p>
+
 ## Installation
 
 You need [`uv`](https://docs.astral.sh/uv/). One-time:
@@ -53,7 +57,11 @@ Easiest one-liner:
 echo 'ANTHROPIC_API_KEY=sk-ant-...' >> ~/.claude/.env
 ```
 
-If the key is missing or invalid, the monitor doesn't silently fail — it pops a native alert and asks for your approval in Claude Code before the agent proceeds.
+If the key is missing or invalid, the monitor doesn't silently fail. It pops a native alert and asks for your approval in Claude Code before the agent proceeds.
+
+<p align="center">
+  <img src="assets/dialog_api_missing.png" alt="API key missing alert dialog" width="380">
+</p>
 
 The rest defaults to something sensible:
 

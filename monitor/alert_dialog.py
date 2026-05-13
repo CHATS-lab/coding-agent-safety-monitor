@@ -102,7 +102,7 @@ def _show_windows_dialog(title: str, message: str) -> int:
 
 def main() -> int:
     """Launch the best available native dialog for the current OS."""
-    title = f"\U0001f6a8 {SEVERITY}: {ISSUE_TYPE}"
+    title = ISSUE_TYPE
     message = f"{BODY_TEXT}\n\n{ACTION_TEXT}"
     system = platform.system()
 

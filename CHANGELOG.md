@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.5] - 2026-05-12
+
+### Changed
+
+- Dialog title is cleaner: dropped the 🚨 emoji and the redundant "Critical: " prefix. macOS already renders the red critical icon via `osascript display alert as critical`.
+- Diagnostic titles shortened to fit one line: `Monitor offline: API key` → `API key needed`, `Monitor offline: rate limited` → `Rate limited`, `Monitor offline: network` → `Network error`.
+- LLM-returned `issue_type` is humanized before display: snake_case / kebab-case → Title Case, length capped at 32 chars. Suspicion dialogs now look uniform regardless of how the LLM phrased the issue type.
+
+### Added
+
+- README screenshots of the two most common dialog scenarios (suspicion finding and missing API key) under `assets/`.
+
 ## [0.0.4] - 2026-05-12
 
 ### Added

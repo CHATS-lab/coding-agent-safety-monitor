@@ -364,6 +364,23 @@ DEFAULT_DIALOG_ACTION = "Approve or reject in Claude Code."
 DIALOG_SEVERITY = "Critical"
 
 
+DIALOG_TITLE_MAX_LEN = 32
+
+
+def _humanize_issue_type(issue_type: str) -> str:
+    """Normalize an LLM-returned issue_type for use as a dialog title.
+
+    Converts snake_case / kebab-case to Title Case, trims whitespace, caps
+    length to keep the dialog title on one line.
+    """
+    cleaned = issue_type.replace("_", " ").replace("-", " ").strip()
+    cleaned = " ".join(cleaned.split())
+    titled = cleaned.title() if cleaned.islower() or cleaned.isupper() else cleaned
+    if len(titled) > DIALOG_TITLE_MAX_LEN:
+        titled = titled[: DIALOG_TITLE_MAX_LEN - 1].rstrip() + "…"
+    return titled or "Suspicious action"
+
+
 def _diagnose_llm_error(error: str) -> tuple[str, str, str]:
     """Map an opaque litellm error into a short, user-actionable diagnostic.
 
@@ -380,19 +397,19 @@ def _diagnose_llm_error(error: str) -> tuple[str, str, str]:
     )
     if is_auth:
         return (
-            "Monitor offline: API key",
+            "API key needed",
             "ANTHROPIC_API_KEY missing or invalid.",
             "Set ANTHROPIC_API_KEY in ~/.claude/.env, ~/.env, or your shell.",
         )
     if "rate" in lowered and "limit" in lowered:
         return (
-            "Monitor offline: rate limited",
+            "Rate limited",
             "Anthropic rate limit hit.",
             "Wait a moment and retry.",
         )
     if "timeout" in lowered or "connection" in lowered or "network" in lowered:
         return (
-            "Monitor offline: network",
+            "Network error",
             "Cannot reach Anthropic API.",
             "Check your internet connection.",
         )
@@ -543,8 +560,9 @@ def main() -> None:
         logger.info("Monitor result: %s", json.dumps(analysis, default=str))
 
         if suspicion > MONITOR_THRESHOLD:
+            dialog_title = _humanize_issue_type(issue_type)
             alert_summary = f"{issue_type}: {issue}"
-            launch_alert_dialog(issue_type, issue, logger)
+            launch_alert_dialog(dialog_title, issue, logger)
             decision_reason = f"Security Monitor ({suspicion}/100): {alert_summary}"
             print(
                 json.dumps(
