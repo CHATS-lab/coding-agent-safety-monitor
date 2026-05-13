@@ -41,9 +41,10 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
 Then in Claude Code:
 
-```text
+```bash
 # Register this repo as a plugin marketplace
 /plugin marketplace add https://github.com/CHATS-lab/coding-agent-safety-monitor.git
+
 # Install the safety-monitor plugin from the marketplace
 /plugin install safety-monitor@safety-monitor
 ```
@@ -51,6 +52,7 @@ Then in Claude Code:
 If you'd rather skip the marketplace, clone and install from a local path:
 
 ```bash
+# Clone the repo
 git clone https://github.com/CHATS-lab/coding-agent-safety-monitor.git
 # In Claude Code:
 /plugin install ./safety-monitor
